@@ -73,10 +73,5 @@
         }
       ]
     }
-  ],
-  "functions": {
-    "overlay-mobile.html": {
-      "maxDuration": 10
-    }
-  }
+  ]
 } 
