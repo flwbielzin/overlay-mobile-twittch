@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Erros - API Twitch</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f0f23;
+            color: white;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: #1a1a2e;
+            border: 1px solid #9146ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success { background: #0f5132; border: 1px solid #198754; }
+        .error { background: #842029; border: 1px solid #dc3545; }
+        .warning { background: #664d03; border: 1px solid #ffc107; }
+        .info { background: #055160; border: 1px solid #0dcaf0; }
+        button {
+            background: #9146ff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #7c3aed; }
+        .log {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .metric {
+            display: inline-block;
+            background: #16213e;
+            border: 1px solid #9146ff;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 5px;
+            min-width: 120px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste de Erros - API Twitch</h1>
+        <p>Este teste verifica se todas as correções de erro estão funcionando adequadamente.</p>
+
+        <!-- Status da Configuração -->
+        <div class="test-section">
+            <h2>📋 Status da Configuração</h2>
+            <div id="config-status"></div>
+        </div>
+
+        <!-- Testes de Conexão -->
+        <div class="test-section">
+            <h2>🔌 Testes de Conexão</h2>
+            <button onclick="testarToken()">🔑 Testar Token</button>
+            <button onclick="testarUsuario()">👤 Testar Usuário</button>
+            <button onclick="testarStream()">📺 Testar Stream</button>
+            <button onclick="testarSeguidores()">❤️ Testar Seguidores</button>
+            <button onclick="testarCompleto()">🧪 Teste Completo</button>
+            <div id="connection-results"></div>
+        </div>
+
+        <!-- Métricas em Tempo Real -->
+        <div class="test-section">
+            <h2>📊 Métricas em Tempo Real</h2>
+            <div id="metrics"></div>
+            <button onclick="iniciarMonitoramento()">▶️ Iniciar Monitoramento</button>
+            <button onclick="pararMonitoramento()">⏹️ Parar Monitoramento</button>
+        </div>
+
+        <!-- Rate Limiting -->
+        <div class="test-section">
+            <h2>⏱️ Rate Limiting</h2>
+            <div id="rate-limit-info"></div>
+            <button onclick="testarRateLimit()">🚀 Teste de Rate Limit</button>
+        </div>
+
+        <!-- Log de Debug -->
+        <div class="test-section">
+            <h2>📝 Log de Debug</h2>
+            <button onclick="limparLog()">🗑️ Limpar Log</button>
+            <div id="debug-log" class="log"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="twitchApi.js"></script>
+    <script>
+        let twitchAPI;
+        let monitoringInterval;
+        let logContainer;
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            logContainer = document.getElementById('debug-log');
+            
+            // Interceptar console.log para mostrar no log
+            const originalLog = console.log;
+            const originalError = console.error;
+            const originalWarn = console.warn;
+            
+            console.log = function(...args) {
+                originalLog.apply(console, args);
+                addToLog('INFO', args.join(' '));
+            };
+            
+            console.error = function(...args) {
+                originalError.apply(console, args);
+                addToLog('ERROR', args.join(' '));
+            };
+            
+            console.warn = function(...args) {
+                originalWarn.apply(console, args);
+                addToLog('WARN', args.join(' '));
+            };
+            
+            // Inicializar API
+            twitchAPI = new TwitchAPI();
+            verificarConfiguracao();
+            atualizarRateLimit();
+        });
+
+        function addToLog(type, message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.style.color = type === 'ERROR' ? '#ff6b6b' : 
+                                  type === 'WARN' ? '#ffd93d' : 
+                                  type === 'INFO' ? '#6bcf7f' : '#ffffff';
+            logEntry.textContent = `[${timestamp}] ${type}: ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function verificarConfiguracao() {
+            const statusDiv = document.getElementById('config-status');
+            let html = '';
+            
+            // Verificar configurações
+            const checks = [
+                { name: 'Client ID', value: CONFIG.TWITCH_CLIENT_ID, required: true },
+                { name: 'Client Secret', value: CONFIG.TWITCH_CLIENT_SECRET, required: true },
+                { name: 'Channel Name', value: CONFIG.CHANNEL_NAME, required: true },
+                { name: 'API Base URL', value: CONFIG.API_BASE_URL, required: true }
+            ];
+            
+            checks.forEach(check => {
+                const status = check.value ? 'success' : 'error';
+                const icon = check.value ? '✅' : '❌';
+                html += `<div class="status ${status}">${icon} ${check.name}: ${check.value ? 'Configurado' : 'Não configurado'}</div>`;
+            });
+            
+            // Verificar ambiente
+            const isProduction = window.location.hostname !== 'localhost';
+            if (isProduction && CONFIG.TWITCH_CLIENT_SECRET) {
+                html += `<div class="status warning">⚠️ Client Secret exposto em produção!</div>`;
+            }
+            
+            statusDiv.innerHTML = html;
+        }
+
+        async function testarToken() {
+            const resultsDiv = document.getElementById('connection-results');
+            resultsDiv.innerHTML = '<div class="status info">🔄 Testando obtenção de token...</div>';
+            
+            try {
+                const token = await twitchAPI.getAppAccessToken();
+                if (token) {
+                    resultsDiv.innerHTML = '<div class="status success">✅ Token obtido com sucesso!</div>';
+                } else {
+                    resultsDiv.innerHTML = '<div class="status error">❌ Falha ao obter token</div>';
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="status error">❌ Erro: ${error.message}</div>`;
+            }
+            
+            atualizarRateLimit();
+        }
+
+        async function testarUsuario() {
+            const resultsDiv = document.getElementById('connection-results');
+            resultsDiv.innerHTML = '<div class="status info">🔄 Testando busca de usuário...</div>';
+            
+            try {
+                const userInfo = await twitchAPI.getUserInfo();
+                if (userInfo) {
+                    resultsDiv.innerHTML = `<div class="status success">✅ Usuário encontrado: ${userInfo.display_name}</div>`;
+                } else {
+                    resultsDiv.innerHTML = '<div class="status error">❌ Usuário não encontrado</div>';
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="status error">❌ Erro: ${error.message}</div>`;
+            }
+            
+            atualizarRateLimit();
+        }
+
+        async function testarStream() {
+            const resultsDiv = document.getElementById('connection-results');
+            resultsDiv.innerHTML = '<div class="status info">🔄 Testando informações da stream...</div>';
+            
+            try {
+                const streamInfo = await twitchAPI.getStreamInfo();
+                if (streamInfo) {
+                    resultsDiv.innerHTML = `<div class="status success">✅ Stream ao vivo! Viewers: ${streamInfo.viewer_count}</div>`;
+                } else {
+                    resultsDiv.innerHTML = '<div class="status warning">⚠️ Stream offline</div>';
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="status error">❌ Erro: ${error.message}</div>`;
+            }
+            
+            atualizarRateLimit();
+        }
+
+        async function testarSeguidores() {
+            const resultsDiv = document.getElementById('connection-results');
+            resultsDiv.innerHTML = '<div class="status info">🔄 Testando contagem de seguidores...</div>';
+            
+            try {
+                const followers = await twitchAPI.getFollowersCount();
+                resultsDiv.innerHTML = `<div class="status success">✅ Seguidores: ${followers}</div>`;
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="status error">❌ Erro: ${error.message}</div>`;
+            }
+            
+            atualizarRateLimit();
+        }
+
+        async function testarCompleto() {
+            const resultsDiv = document.getElementById('connection-results');
+            resultsDiv.innerHTML = '<div class="status info">🔄 Executando teste completo...</div>';
+            
+            try {
+                const success = await twitchAPI.testConnection();
+                if (success) {
+                    resultsDiv.innerHTML = '<div class="status success">✅ Todos os testes passaram!</div>';
+                } else {
+                    resultsDiv.innerHTML = '<div class="status error">❌ Alguns testes falharam</div>';
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="status error">❌ Erro: ${error.message}</div>`;
+            }
+            
+            atualizarRateLimit();
+        }
+
+        async function iniciarMonitoramento() {
+            if (monitoringInterval) {
+                clearInterval(monitoringInterval);
+            }
+            
+            monitoringInterval = setInterval(async () => {
+                try {
+                    const channelInfo = await twitchAPI.getChannelInfo();
+                    if (channelInfo) {
+                        atualizarMetricas(channelInfo);
+                    }
+                } catch (error) {
+                    console.error('Erro no monitoramento:', error);
+                }
+            }, 30000);
+            
+            // Primeira atualização imediata
+            const channelInfo = await twitchAPI.getChannelInfo();
+            if (channelInfo) {
+                atualizarMetricas(channelInfo);
+            }
+        }
+
+        function pararMonitoramento() {
+            if (monitoringInterval) {
+                clearInterval(monitoringInterval);
+                monitoringInterval = null;
+            }
+        }
+
+        function atualizarMetricas(channelInfo) {
+            const metricsDiv = document.getElementById('metrics');
+            metricsDiv.innerHTML = `
+                <div class="metric">
+                    <strong>👤 Streamer</strong><br>
+                    ${channelInfo.display_name}
+                </div>
+                <div class="metric">
+                    <strong>📺 Status</strong><br>
+                    ${channelInfo.is_live ? '🔴 AO VIVO' : '⚫ OFFLINE'}
+                </div>
+                <div class="metric">
+                    <strong>👥 Viewers</strong><br>
+                    ${channelInfo.viewer_count}
+                </div>
+                <div class="metric">
+                    <strong>❤️ Seguidores</strong><br>
+                    ${channelInfo.follower_count}
+                </div>
+                <div class="metric">
+                    <strong>🎮 Categoria</strong><br>
+                    ${channelInfo.game_name}
+                </div>
+                <div class="metric">
+                    <strong>📝 Título</strong><br>
+                    ${channelInfo.title.substring(0, 30)}...
+                </div>
+            `;
+        }
+
+        function atualizarRateLimit() {
+            const rateLimitDiv = document.getElementById('rate-limit-info');
+            rateLimitDiv.innerHTML = `
+                <div class="metric">
+                    <strong>📊 Requests Restantes</strong><br>
+                    ${twitchAPI.rateLimitRemaining}
+                </div>
+                <div class="metric">
+                    <strong>⏰ Reset em</strong><br>
+                    ${Math.max(0, Math.ceil((twitchAPI.rateLimitReset - Date.now()) / 1000))}s
+                </div>
+                <div class="metric">
+                    <strong>🔌 Status API</strong><br>
+                    ${twitchAPI.isApiConnected() ? '✅ Conectado' : '❌ Desconectado'}
+                </div>
+            `;
+        }
+
+        async function testarRateLimit() {
+            const resultsDiv = document.getElementById('connection-results');
+            resultsDiv.innerHTML = '<div class="status info">🔄 Testando rate limiting...</div>';
+            
+            let requests = 0;
+            let errors = 0;
+            
+            for (let i = 0; i < 10; i++) {
+                try {
+                    await twitchAPI.getUserInfo();
+                    requests++;
+                } catch (error) {
+                    errors++;
+                    if (error.message.includes('Rate limit')) {
+                        break;
+                    }
+                }
+                atualizarRateLimit();
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            resultsDiv.innerHTML = `<div class="status success">✅ Rate limit test: ${requests} requests, ${errors} errors</div>`;
+        }
+
+        function limparLog() {
+            logContainer.innerHTML = '';
+        }
+    </script>
+</body>
+</html>
