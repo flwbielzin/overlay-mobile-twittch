@@ -1,0 +1,487 @@
+/* Estilos para Overlay Mobile (IRL) */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: transparent;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+}
+
+.mobile-overlay {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* Informações do Canal - Compacto */
+.channel-info-mobile {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #9146ff;
+    border-radius: 25px;
+    padding: 8px 15px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(145, 70, 255, 0.3);
+    pointer-events: auto;
+    max-width: 280px;
+}
+
+.streamer-avatar-mobile {
+    position: relative;
+    margin-right: 10px;
+}
+
+.streamer-avatar-mobile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #00ff88;
+}
+
+.live-indicator-mobile {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background: rgba(255, 0, 0, 0.9);
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    border: 2px solid white;
+}
+
+.channel-details-mobile {
+    flex: 1;
+    min-width: 0;
+}
+
+.streamer-name-mobile {
+    color: #9146ff;
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.stream-title-mobile {
+    color: white;
+    font-size: 11px;
+    opacity: 0.9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Contadores Compactos - Ajustado para 2 contadores */
+.counters-mobile {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.counter-item-mobile {
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #00ff88;
+    border-radius: 18px;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+    pointer-events: auto;
+    min-width: 60px;
+}
+
+/* Cores diferentes para cada contador */
+.counter-item-mobile:nth-child(1) {
+    border-color: #00ff88; /* Viewers - Verde */
+}
+
+.counter-item-mobile:nth-child(2) {
+    border-color: #ff6b6b; /* Followers - Vermelho */
+}
+
+.counter-icon {
+    font-size: 12px;
+}
+
+.counter-value {
+    color: #00ff88;
+    font-weight: bold;
+    font-size: 11px;
+    min-width: 18px;
+    text-align: center;
+}
+
+/* Cores dos valores conforme o tipo */
+.counter-item-mobile:nth-child(1) .counter-value {
+    color: #00ff88; /* Viewers */
+}
+
+.counter-item-mobile:nth-child(2) .counter-value {
+    color: #ff6b6b; /* Followers */
+}
+
+/* Chat Compacto - MOVIDO PARA LATERAL ESQUERDA NO MEIO */
+.chat-container-mobile {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    width: 200px;
+    max-height: 220px;
+    background: rgba(0, 0, 0, 0.85);
+    border: 2px solid #9146ff;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(145, 70, 255, 0.3);
+    pointer-events: auto;
+    overflow: hidden;
+}
+
+.chat-header-mobile {
+    background: rgba(145, 70, 255, 0.2);
+    padding: 8px 12px;
+    border-bottom: 1px solid #9146ff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+#toggle-chat-mobile {
+    background: none;
+    border: 1px solid #9146ff;
+    color: #9146ff;
+    border-radius: 3px;
+    padding: 2px 6px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.chat-messages-mobile {
+    padding: 8px;
+    max-height: 170px;
+    overflow-y: auto;
+    font-size: 11px;
+}
+
+.chat-message-mobile {
+    margin-bottom: 3px;
+    padding: 2px 4px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 4px;
+    font-size: 9px;
+    line-height: 1.2;
+}
+
+.chat-username-mobile {
+    font-weight: bold;
+    margin-right: 3px;
+    font-size: 9px;
+}
+
+.chat-text-mobile {
+    color: white;
+    word-wrap: break-word;
+    font-size: 9px;
+    opacity: 0.85;
+}
+
+.chat-timestamp-mobile {
+    display: none; /* Removido para simplificar */
+}
+
+/* Alertas para Mobile */
+.alerts-container-mobile {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.alert-mobile {
+    background: linear-gradient(135deg, #9146ff, #00ff88);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(145, 70, 255, 0.5);
+    animation: alertSlideInMobile 0.5s ease-out;
+    margin-bottom: 10px;
+    max-width: 280px;
+}
+
+.alert-mobile h3 {
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.alert-mobile p {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+@keyframes alertSlideInMobile {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Seguidores Recentes - MOVIDO PARA DIREITA */
+.recent-followers-mobile {
+    position: absolute;
+    bottom: 80px;
+    right: 10px; /* MUDADO: de left para right */
+    width: 180px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #00ff88;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
+    pointer-events: auto;
+}
+
+.followers-header-mobile {
+    background: rgba(0, 255, 136, 0.2);
+    padding: 8px 12px;
+    border-bottom: 1px solid #00ff88;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.followers-list-mobile {
+    padding: 8px;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.follower-item-mobile {
+    display: flex;
+    align-items: center;
+    padding: 4px 6px;
+    margin-bottom: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border-left: 2px solid #00ff88;
+}
+
+.follower-avatar-mobile {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-right: 8px;
+    border: 1px solid #00ff88;
+}
+
+.follower-name-mobile {
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+/* Informações de Localização (IRL) - MOVIDO PARA ESQUERDA */
+.location-info-mobile {
+    position: absolute;
+    bottom: 40px;
+    left: 10px; /* Mantido à esquerda */
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #ff6b6b;
+    border-radius: 20px;
+    padding: 6px 12px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    pointer-events: auto;
+}
+
+.location-icon {
+    font-size: 14px;
+    margin-right: 6px;
+}
+
+.location-text {
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+/* Tempo de Stream - MOVIDO PARA DIREITA */
+.stream-time-mobile {
+    position: absolute;
+    bottom: 40px; /* Alinhado com localização */
+    right: 10px; /* MUDADO: de left para right */
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #ffd700;
+    border-radius: 20px;
+    padding: 6px 12px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+    pointer-events: auto;
+}
+
+.time-icon {
+    font-size: 14px;
+    margin-right: 6px;
+}
+
+#stream-uptime-mobile {
+    color: #ffd700;
+    font-size: 11px;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+}
+
+/* Scrollbars personalizadas para mobile */
+.chat-messages-mobile::-webkit-scrollbar,
+.followers-list-mobile::-webkit-scrollbar {
+    width: 4px;
+}
+
+.chat-messages-mobile::-webkit-scrollbar-track,
+.followers-list-mobile::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+}
+
+.chat-messages-mobile::-webkit-scrollbar-thumb,
+.followers-list-mobile::-webkit-scrollbar-thumb {
+    background: #9146ff;
+    border-radius: 2px;
+}
+
+/* Responsividade para diferentes tamanhos de tela mobile */
+@media (max-width: 480px) {
+    .channel-info-mobile {
+        max-width: 250px;
+    }
+    
+    .chat-container-mobile {
+        width: 180px;
+        max-height: 200px;
+        /* Mantém top: 50% e transform: translateY(-50%) */
+    }
+    
+    .recent-followers-mobile {
+        width: 160px;
+    }
+    
+    .counter-item-mobile {
+        padding: 4px 8px;
+        min-width: 55px;
+    }
+    
+    .counter-icon {
+        font-size: 11px;
+    }
+    
+    .counter-value {
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 360px) {
+    .channel-info-mobile {
+        max-width: 220px;
+        padding: 6px 12px;
+    }
+    
+    .streamer-avatar-mobile img {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .chat-container-mobile {
+        width: 160px;
+        max-height: 180px;
+        /* Mantém top: 50% e transform: translateY(-50%) */
+    }
+    
+    .recent-followers-mobile {
+        width: 140px;
+    }
+    
+    .counter-item-mobile {
+        padding: 3px 6px;
+        min-width: 50px;
+        gap: 3px;
+    }
+    
+    .counter-icon {
+        font-size: 10px;
+    }
+    
+    .counter-value {
+        font-size: 9px;
+    }
+}
+
+/* Animações suaves */
+.mobile-overlay > * {
+    transition: all 0.3s ease;
+}
+
+/* Estados de hover para elementos interativos */
+.counter-item-mobile:hover,
+.chat-container-mobile:hover,
+.recent-followers-mobile:hover,
+.location-info-mobile:hover,
+.stream-time-mobile:hover {
+    transform: scale(1.02);
+}
+
+/* Efeito de pulsação para indicador ao vivo */
+.live-indicator-mobile {
+    animation: pulseLive 2s infinite;
+}
+
+@keyframes pulseLive {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/* Animação para contadores quando valores mudam */
+.counter-value {
+    transition: all 0.3s ease;
+}
+
+.counter-value.updated {
+    animation: counterUpdate 0.5s ease;
+}
+
+@keyframes counterUpdate {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); color: #fff; }
+    100% { transform: scale(1); }
+} 

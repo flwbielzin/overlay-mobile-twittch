@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Overlay Mobile - Carregando...</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles-mobile.css">
+</head>
+<body>
+    <!-- Overlay para Celular/IRL -->
+    <div class="mobile-overlay">
+        <!-- Informações do Canal (Compacto) -->
+        <div class="channel-info-mobile">
+            <div class="streamer-avatar-mobile">
+                <img id="streamer-avatar-mobile" src="https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-70x70.png" alt="Avatar">
+                <div class="live-indicator-mobile">🔴</div>
+            </div>
+            <div class="channel-details-mobile">
+                <div class="streamer-name-mobile" id="streamer-name-mobile">Carregando...</div>
+                <div class="stream-title-mobile" id="stream-title-mobile">Carregando informações...</div>
+            </div>
+        </div>
+
+        <!-- Contadores Compactos -->
+        <div class="counters-mobile">
+            <div class="counter-item-mobile">
+                <span class="counter-icon">👥</span>
+                <span class="counter-value" id="viewers-count-mobile">0</span>
+            </div>
+            <div class="counter-item-mobile">
+                <span class="counter-icon">❤️</span>
+                <span class="counter-value" id="followers-count-mobile">0</span>
+            </div>
+        </div>
+
+        <!-- Chat Compacto (Lateral) -->
+        <div class="chat-container-mobile">
+            <div class="chat-header-mobile">
+                <span>💬 Chat</span>
+                <button id="toggle-chat-mobile" onclick="toggleMobileChat()">−</button>
+            </div>
+            <div class="chat-messages-mobile" id="chat-messages-mobile">
+                <!-- Mensagens do chat aparecerão aqui -->
+            </div>
+        </div>
+
+        <!-- Alertas para Mobile -->
+        <div class="alerts-container-mobile" id="alerts-container-mobile">
+            <!-- Alertas aparecerão aqui -->
+        </div>
+
+        <!-- Seguidores Recentes (Compacto) -->
+        <div class="recent-followers-mobile">
+            <div class="followers-header-mobile">🆕 Novos Seguidores</div>
+            <div class="followers-list-mobile" id="followers-list-mobile">
+                <!-- Lista de seguidores recentes -->
+            </div>
+        </div>
+
+        <!-- Informações de Localização (Para IRL) -->
+        <div class="location-info-mobile">
+            <div class="location-icon">📍</div>
+            <div class="location-text" id="location-text-mobile">Obtendo localização...</div>
+        </div>
+
+        <!-- Tempo de Stream -->
+        <div class="stream-time-mobile">
+            <span class="time-icon">⏰</span>
+            <span id="stream-uptime-mobile">00:00:00</span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="twitchApi.js"></script>
+    <script src="overlay-mobile.js"></script>
+    
+    <!-- Inicializar Sistema -->
+    <script>
+        // Variáveis globais
+        let twitchAPI;
+        let mobileOverlay;
+        
+        // Função para inicializar tudo na ordem correta
+        async function inicializarSistema() {
+            console.log('🚀 Iniciando sistema overlay mobile...');
+            
+            try {
+                // 1. Verificar configuração
+                if (typeof CONFIG === 'undefined') {
+                    console.error('❌ CONFIG não encontrado!');
+                    return;
+                }
+                console.log('✅ Configuração carregada:', CONFIG.CHANNEL_NAME);
+                
+                // 2. Inicializar API da Twitch
+                if (typeof TwitchAPI === 'undefined') {
+                    console.error('❌ TwitchAPI não encontrada!');
+                    return;
+                }
+                
+                twitchAPI = new TwitchAPI();
+                console.log('✅ API da Twitch criada');
+                
+                // 3. Testar conexão da API
+                const connected = await twitchAPI.testConnection();
+                if (connected) {
+                    console.log('✅ API da Twitch conectada com sucesso!');
+                } else {
+                    console.warn('⚠️ API da Twitch não conectada, usando modo simulado');
+                }
+                
+                // 4. Inicializar overlay mobile
+                if (typeof MobileOverlay === 'undefined') {
+                    console.error('❌ MobileOverlay não encontrado!');
+                    return;
+                }
+                
+                mobileOverlay = new MobileOverlay();
+                await mobileOverlay.initialize();
+                
+                console.log('🎉 Sistema inicializado com sucesso!');
+                
+            } catch (error) {
+                console.error('❌ Erro na inicialização:', error);
+            }
+        }
+        
+        // Inicializar quando a página carregar
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('📱 Carregando overlay mobile...');
+            
+            // Aguardar um pouco para garantir que todos os scripts carregaram
+            setTimeout(inicializarSistema, 500);
+        });
+        
+        // Limpar ao sair
+        window.addEventListener('beforeunload', () => {
+            if (mobileOverlay) {
+                mobileOverlay.stop();
+            }
+        });
+    </script>
+</body>
+</html> 
