@@ -5,21 +5,17 @@ const CONFIG = {
     
     // ⚠️ AVISO DE SEGURANÇA: Em produção, NUNCA exponha o Client Secret no frontend!
     // Use um backend/servidor para gerenciar tokens de forma segura
-    TWITCH_CLIENT_SECRET: 'wwkph643l9fjxsthmdwsj1a3rqj1r7', // APENAS PARA DESENVOLVIMENTO
+    TWITCH_CLIENT_SECRET: '', // Deixe vazio para segurança no frontend
     
-    CHANNEL_NAME: 'flwbielzin',
+    CHANNEL_NAME: 'flwbielzinn',
     
     // URLs da API da Twitch
     API_BASE_URL: 'https://api.twitch.tv/helix',
     OAUTH_URL: 'https://id.twitch.tv/oauth2/token',
     
     // Configurações de atualização (em milissegundos)
-    UPDATE_INTERVALS: {
-        CHANNEL_INFO: 30000,    // 30 segundos
-        FOLLOWERS: 60000,       // 1 minuto
-        VIEWERS: 15000,         // 15 segundos
-        CHAT: 5000              // 5 segundos
-    },
+    UPDATE_INTERVAL: 30000, // 30 segundos
+    DEBUG_MODE: true,
     
     // Configurações de rate limiting
     RATE_LIMIT: {
@@ -100,4 +96,10 @@ function validateConfig() {
 }
 
 // Validar configuração na inicialização
-validateConfig(); 
+validateConfig();
+
+// Verificar se as configurações estão corretas
+if (typeof window !== 'undefined') {
+    console.log('⚙️ Configuração carregada para canal:', CONFIG.CHANNEL_NAME);
+    console.log('🔑 Client ID configurado:', CONFIG.TWITCH_CLIENT_ID ? 'Sim ✅' : 'Não ❌');
+} 

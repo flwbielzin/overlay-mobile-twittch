@@ -121,6 +121,10 @@ body {
     border-color: #ff6b6b; /* Followers - Vermelho */
 }
 
+.counter-item-mobile:nth-child(3) {
+    border-color: #00bfff; /* Chatters - Azul */
+}
+
 .counter-icon {
     font-size: 12px;
 }
@@ -140,6 +144,10 @@ body {
 
 .counter-item-mobile:nth-child(2) .counter-value {
     color: #ff6b6b; /* Followers */
+}
+
+.counter-item-mobile:nth-child(3) .counter-value {
+    color: #00bfff; /* Chatters */
 }
 
 /* Seguidores Recentes - Lado esquerdo no topo */

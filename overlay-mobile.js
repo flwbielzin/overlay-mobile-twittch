@@ -14,7 +14,7 @@ class MobileOverlay {
             viewers: 45,
             followers: 1247,
             isLive: true,
-            avatar: `https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-70x70.png`,
+            avatar: this.getDefaultAvatar(), // Usar função para avatar padrão
             startTime: new Date()
         };
         
@@ -24,12 +24,94 @@ class MobileOverlay {
         console.log('📱 MobileOverlay inicializado');
     }
 
+    // Função para obter avatar padrão baseado no nome do canal
+    getDefaultAvatar() {
+        const channelName = CONFIG.CHANNEL_NAME || 'flwbielzinn';
+        // Tentar usar avatar específico do canal primeiro
+        return `https://static-cdn.jtvnw.net/jtv_user_pictures/${channelName}-profile_image-300x300.png`;
+    }
+
+    // Função específica para buscar avatar real da Twitch
+    async loadRealAvatar() {
+        try {
+            console.log('🖼️ Buscando avatar real da Twitch...');
+            
+            if (typeof twitchAPI !== 'undefined') {
+                const userInfo = await twitchAPI.getUserInfo();
+                
+                if (userInfo && userInfo.profile_image_url) {
+                    console.log('✅ Avatar real encontrado:', userInfo.profile_image_url);
+                    this.currentData.avatar = userInfo.profile_image_url;
+                    
+                    // Atualizar imediatamente na interface
+                    const streamerAvatar = document.getElementById('streamer-avatar-mobile');
+                    if (streamerAvatar) {
+                        streamerAvatar.src = this.currentData.avatar;
+                        console.log('🖼️ Avatar atualizado na interface');
+                    }
+                    
+                    return userInfo.profile_image_url;
+                } else {
+                    console.log('⚠️ Avatar não encontrado na API, usando fallback');
+                }
+            }
+            
+            // Fallback: tentar URL direta do Twitch
+            const channelName = CONFIG.CHANNEL_NAME || 'flwbielzinn';
+            const fallbackAvatars = [
+                `https://static-cdn.jtvnw.net/jtv_user_pictures/${channelName}-profile_image-300x300.png`,
+                `https://static-cdn.jtvnw.net/jtv_user_pictures/${channelName}-profile_image-150x150.png`,
+                `https://static-cdn.jtvnw.net/jtv_user_pictures/${channelName}-profile_image-70x70.png`
+            ];
+            
+            // Testar cada URL de fallback
+            for (const avatarUrl of fallbackAvatars) {
+                if (await this.testImageUrl(avatarUrl)) {
+                    console.log('✅ Avatar encontrado via fallback:', avatarUrl);
+                    this.currentData.avatar = avatarUrl;
+                    
+                    const streamerAvatar = document.getElementById('streamer-avatar-mobile');
+                    if (streamerAvatar) {
+                        streamerAvatar.src = this.currentData.avatar;
+                    }
+                    
+                    return avatarUrl;
+                }
+            }
+            
+            console.log('⚠️ Nenhum avatar específico encontrado, usando padrão');
+            return this.getDefaultAvatar();
+            
+        } catch (error) {
+            console.error('❌ Erro ao buscar avatar:', error);
+            return this.getDefaultAvatar();
+        }
+    }
+
+    // Função para testar se uma URL de imagem existe
+    async testImageUrl(url) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+            img.src = url;
+            
+            // Timeout de 3 segundos
+            setTimeout(() => resolve(false), 3000);
+        });
+    }
+
     async initialize() {
         try {
             console.log('🚀 Inicializando overlay mobile...');
             
             // Sempre inicializar com dados (API ou simulados)
             await this.loadInitialData();
+            
+            // Buscar avatar real em paralelo
+            this.loadRealAvatar().catch(error => {
+                console.log('⚠️ Erro ao carregar avatar real, mantendo padrão');
+            });
             
             // Atualizar interface imediatamente
             this.updateInterface();
@@ -75,11 +157,12 @@ class MobileOverlay {
                         viewers: channelInfo.viewer_count || Math.floor(Math.random() * 100) + 20,
                         followers: channelInfo.follower_count || Math.floor(Math.random() * 2000) + 500,
                         isLive: channelInfo.is_live || true,
-                        avatar: channelInfo.profile_image_url || this.currentData.avatar,
+                        avatar: channelInfo.profile_image_url || this.getDefaultAvatar(),
                         startTime: channelInfo.started_at ? new Date(channelInfo.started_at) : new Date()
                     };
                     
                     console.log('📊 Usando dados reais da API');
+                    console.log('🖼️ Avatar da API:', this.currentData.avatar);
                 } else {
                     console.log('⚠️ API não retornou dados válidos, usando simulados');
                     this.useSimulatedData();
@@ -101,7 +184,7 @@ class MobileOverlay {
 
     useSimulatedData() {
         // Gerar dados simulados realistas
-        const channelName = CONFIG.CHANNEL_NAME || 'flwbielzin';
+        const channelName = CONFIG.CHANNEL_NAME || 'flwbielzinn';
         const displayName = channelName.charAt(0).toUpperCase() + channelName.slice(1);
         
         this.currentData = {
@@ -111,11 +194,12 @@ class MobileOverlay {
             viewers: Math.floor(Math.random() * 80) + 25, // 25-105 viewers
             followers: Math.floor(Math.random() * 1500) + 800, // 800-2300 followers
             isLive: true, // Sempre mostrar como ao vivo para demonstração
-            avatar: `https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-70x70.png`,
+            avatar: this.getDefaultAvatar(), // Usar função para avatar específico
             startTime: new Date(Date.now() - Math.random() * 7200000) // Até 2h atrás
         };
         
         console.log('🎭 Dados simulados criados:', this.currentData);
+        console.log('🖼️ Avatar simulado:', this.currentData.avatar);
     }
 
     getRandomTitle() {
@@ -157,8 +241,25 @@ class MobileOverlay {
             }
             
             if (streamerAvatar) {
+                console.log('🖼️ Atualizando avatar para:', this.currentData.avatar);
+                
+                // Configurar avatar com fallback
                 streamerAvatar.src = this.currentData.avatar;
                 streamerAvatar.alt = this.currentData.displayName;
+                
+                // Adicionar tratamento de erro para o avatar
+                streamerAvatar.onerror = () => {
+                    console.log('❌ Erro ao carregar avatar, usando padrão');
+                    const defaultAvatar = `https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-70x70.png`;
+                    if (streamerAvatar.src !== defaultAvatar) {
+                        streamerAvatar.src = defaultAvatar;
+                    }
+                };
+                
+                // Adicionar evento de sucesso
+                streamerAvatar.onload = () => {
+                    console.log('✅ Avatar carregado com sucesso');
+                };
             }
             
             // Atualizar contadores
@@ -174,6 +275,7 @@ class MobileOverlay {
     updateCounters() {
         const viewersElement = document.getElementById('viewers-count-mobile');
         const followersElement = document.getElementById('followers-count-mobile');
+        const chattersElement = document.getElementById('chatters-count-mobile');
         
         if (viewersElement) {
             viewersElement.textContent = this.formatNumber(this.currentData.viewers);
@@ -181,6 +283,12 @@ class MobileOverlay {
         
         if (followersElement) {
             followersElement.textContent = this.formatNumber(this.currentData.followers);
+        }
+        
+        if (chattersElement) {
+            // Chatters geralmente são 10-30% dos viewers
+            const chatters = Math.floor(this.currentData.viewers * (0.1 + Math.random() * 0.2));
+            chattersElement.textContent = this.formatNumber(chatters);
         }
     }
 
