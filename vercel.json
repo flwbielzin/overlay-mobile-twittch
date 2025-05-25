@@ -15,20 +15,6 @@
       "use": "@vercel/static"
     }
   ],
-  "routes": [
-    {
-      "src": "/",
-      "dest": "/overlay-mobile.html"
-    },
-    {
-      "src": "/overlay",
-      "dest": "/overlay-mobile.html"
-    },
-    {
-      "src": "/mobile",
-      "dest": "/overlay-mobile.html"
-    }
-  ],
   "headers": [
     {
       "source": "**/*.html",
@@ -72,6 +58,20 @@
           "value": "*"
         }
       ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/overlay-mobile.html"
+    },
+    {
+      "source": "/overlay",
+      "destination": "/overlay-mobile.html"
+    },
+    {
+      "source": "/mobile",
+      "destination": "/overlay-mobile.html"
     }
   ]
 } 
