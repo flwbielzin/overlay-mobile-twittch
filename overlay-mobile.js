@@ -1,443 +1,437 @@
-// Overlay Mobile - Versão Corrigida para PRISM
+/**
+ * Overlay Mobile Minimalista para Twitch
+ * Versão: 3.0 - Apenas Novo Seguidor + Último Seguidor + Tempo de Live
+ * Canal: FlwBielzinn
+ */
+
 class MobileOverlay {
     constructor() {
-        this.isInitialized = false;
-        this.updateInterval = null;
-        this.followersInterval = null;
-        this.uptimeInterval = null;
+        console.log('🎮 Inicializando MobileOverlay Minimalista v3.0...');
         
-        // Dados atuais (sempre terão valores)
-        this.currentData = {
-            streamerName: CONFIG.CHANNEL_NAME || 'Streamer',
-            displayName: CONFIG.CHANNEL_NAME || 'Streamer',
-            title: 'Live IRL - Explorando a cidade! 🎮',
-            viewers: 45,
-            followers: 1247,
-            isLive: true,
-            avatar: this.getDefaultAvatar(), // Usar função para avatar padrão
-            startTime: new Date()
+        // Configurações
+        this.config = {
+            channelName: CONFIG?.CHANNEL_NAME || 'flwbielzinn',
+            simulationMode: true,
+            checkInterval: 30000, // 30 segundos
+            notificationDuration: 5000, // 5 segundos
+            liveStartTime: null
         };
         
-        // Seguidores recentes
-        this.recentFollowers = ['João123', 'MariGamer', 'PedroLive', 'AnaStream'];
+        // Estado
+        this.isRunning = false;
+        this.lastFollower = null;
+        this.liveTimer = null;
+        this.twitchAPI = null;
+        this.lastFollowerCount = 0;
+        this.apiConnected = false;
         
-        console.log('📱 MobileOverlay inicializado');
+        // Elementos DOM
+        this.elements = {
+            lastFollowerName: null,
+            liveTimeValue: null,
+            followerNotification: null,
+            newFollowerName: null
+        };
+        
+        // Lista de nomes para simulação
+        this.simulatedNames = [
+            'GamerPro123', 'StreamFan456', 'TwitchLover789', 'GameMaster2024',
+            'PixelWarrior', 'CodeNinja', 'RetroGamer', 'StreamHunter',
+            'DigitalDreamer', 'CyberPunk2077', 'NeonGlow', 'StarPlayer',
+            'MegaFan', 'UltraGamer', 'SuperStream', 'ElitePlayer',
+            'ProGamer360', 'StreamKing', 'GameLegend', 'PixelMaster'
+        ];
+        
+        console.log('✅ MobileOverlay configurado:', this.config);
     }
-
-    // Função para obter avatar padrão baseado no nome do canal
-    getDefaultAvatar() {
-        const channelName = CONFIG.CHANNEL_NAME || 'flwbielzinn';
-        // Tentar usar avatar específico do canal primeiro
-        return `https://static-cdn.jtvnw.net/jtv_user_pictures/${channelName}-profile_image-300x300.png`;
-    }
-
-    // Função específica para buscar avatar real da Twitch
-    async loadRealAvatar() {
-        try {
-            console.log('🖼️ Buscando avatar real da Twitch...');
-            
-            if (typeof twitchAPI !== 'undefined') {
-                const userInfo = await twitchAPI.getUserInfo();
-                
-                if (userInfo && userInfo.profile_image_url) {
-                    console.log('✅ Avatar real encontrado:', userInfo.profile_image_url);
-                    this.currentData.avatar = userInfo.profile_image_url;
-                    
-                    // Atualizar imediatamente na interface
-                    const streamerAvatar = document.getElementById('streamer-avatar-mobile');
-                    if (streamerAvatar) {
-                        streamerAvatar.src = this.currentData.avatar;
-                        console.log('🖼️ Avatar atualizado na interface');
-                    }
-                    
-                    return userInfo.profile_image_url;
-                } else {
-                    console.log('⚠️ Avatar não encontrado na API, usando fallback');
-                }
-            }
-            
-            // Fallback: tentar URL direta do Twitch
-            const channelName = CONFIG.CHANNEL_NAME || 'flwbielzinn';
-            const fallbackAvatars = [
-                `https://static-cdn.jtvnw.net/jtv_user_pictures/${channelName}-profile_image-300x300.png`,
-                `https://static-cdn.jtvnw.net/jtv_user_pictures/${channelName}-profile_image-150x150.png`,
-                `https://static-cdn.jtvnw.net/jtv_user_pictures/${channelName}-profile_image-70x70.png`
-            ];
-            
-            // Testar cada URL de fallback
-            for (const avatarUrl of fallbackAvatars) {
-                if (await this.testImageUrl(avatarUrl)) {
-                    console.log('✅ Avatar encontrado via fallback:', avatarUrl);
-                    this.currentData.avatar = avatarUrl;
-                    
-                    const streamerAvatar = document.getElementById('streamer-avatar-mobile');
-                    if (streamerAvatar) {
-                        streamerAvatar.src = this.currentData.avatar;
-                    }
-                    
-                    return avatarUrl;
-                }
-            }
-            
-            console.log('⚠️ Nenhum avatar específico encontrado, usando padrão');
-            return this.getDefaultAvatar();
-            
-        } catch (error) {
-            console.error('❌ Erro ao buscar avatar:', error);
-            return this.getDefaultAvatar();
-        }
-    }
-
-    // Função para testar se uma URL de imagem existe
-    async testImageUrl(url) {
-        return new Promise((resolve) => {
-            const img = new Image();
-            img.onload = () => resolve(true);
-            img.onerror = () => resolve(false);
-            img.src = url;
-            
-            // Timeout de 3 segundos
-            setTimeout(() => resolve(false), 3000);
-        });
-    }
-
+    
+    /**
+     * Inicializar o overlay
+     */
     async initialize() {
+        console.log('🚀 Inicializando overlay mobile minimalista...');
+        
         try {
-            console.log('🚀 Inicializando overlay mobile...');
+            // 1. Buscar elementos DOM
+            this.findDOMElements();
             
-            // Sempre inicializar com dados (API ou simulados)
-            await this.loadInitialData();
+            // 2. Tentar conectar com API da Twitch
+            await this.connectToTwitchAPI();
             
-            // Buscar avatar real em paralelo
-            this.loadRealAvatar().catch(error => {
-                console.log('⚠️ Erro ao carregar avatar real, mantendo padrão');
-            });
+            // 3. Configurar tempo de live
+            this.setupLiveTimer();
             
-            // Atualizar interface imediatamente
-            this.updateInterface();
+            // 4. Inicializar último seguidor
+            this.initializeLastFollower();
             
-            // Iniciar sistemas essenciais
-            this.startFollowersUpdate();
-            this.startUptimeCounter();
-            this.startDataUpdates();
+            // 5. Configurar verificação de novos seguidores
+            this.setupFollowerCheck();
             
-            this.isInitialized = true;
-            console.log('✅ Overlay mobile inicializado com sucesso!');
+            // 6. Marcar como rodando
+            this.isRunning = true;
             
-            return true;
+            console.log('🎉 Overlay mobile minimalista inicializado com sucesso!');
+            
         } catch (error) {
             console.error('❌ Erro na inicialização:', error);
-            
-            // Mesmo com erro, garantir que funcione
-            this.updateInterface();
-            this.startUptimeCounter();
-            
-            return false;
         }
     }
-
-    async loadInitialData() {
-        try {
-            console.log('📊 Carregando dados iniciais...');
-            
-            // Tentar obter dados da API
-            if (typeof twitchAPI !== 'undefined') {
-                console.log('🔄 Tentando conectar com API da Twitch...');
-                
-                const channelInfo = await twitchAPI.getChannelInfo();
-                
-                if (channelInfo && channelInfo.display_name) {
-                    console.log('✅ Dados da API obtidos:', channelInfo.display_name);
-                    
-                    // Usar dados reais da API
-                    this.currentData = {
-                        streamerName: channelInfo.login || CONFIG.CHANNEL_NAME,
-                        displayName: channelInfo.display_name,
-                        title: channelInfo.title || 'Live IRL - Explorando a cidade! 🎮',
-                        viewers: channelInfo.viewer_count || Math.floor(Math.random() * 100) + 20,
-                        followers: channelInfo.follower_count || Math.floor(Math.random() * 2000) + 500,
-                        isLive: channelInfo.is_live || true,
-                        avatar: channelInfo.profile_image_url || this.getDefaultAvatar(),
-                        startTime: channelInfo.started_at ? new Date(channelInfo.started_at) : new Date()
-                    };
-                    
-                    console.log('📊 Usando dados reais da API');
-                    console.log('🖼️ Avatar da API:', this.currentData.avatar);
-                } else {
-                    console.log('⚠️ API não retornou dados válidos, usando simulados');
-                    this.useSimulatedData();
-                }
-            } else {
-                console.log('⚠️ API não disponível, usando dados simulados');
-                this.useSimulatedData();
-            }
-            
-            // Atualizar título da página
-            this.updatePageTitle();
-            
-        } catch (error) {
-            console.error('❌ Erro ao carregar dados:', error);
-            console.log('🎭 Fallback para dados simulados');
-            this.useSimulatedData();
-        }
-    }
-
-    useSimulatedData() {
-        // Gerar dados simulados realistas
-        const channelName = CONFIG.CHANNEL_NAME || 'flwbielzinn';
-        const displayName = channelName.charAt(0).toUpperCase() + channelName.slice(1);
+    
+    /**
+     * Buscar elementos DOM
+     */
+    findDOMElements() {
+        console.log('🔍 Buscando elementos DOM...');
         
-        this.currentData = {
-            streamerName: channelName,
-            displayName: displayName,
-            title: this.getRandomTitle(),
-            viewers: Math.floor(Math.random() * 80) + 25, // 25-105 viewers
-            followers: Math.floor(Math.random() * 1500) + 800, // 800-2300 followers
-            isLive: true, // Sempre mostrar como ao vivo para demonstração
-            avatar: this.getDefaultAvatar(), // Usar função para avatar específico
-            startTime: new Date(Date.now() - Math.random() * 7200000) // Até 2h atrás
+        this.elements = {
+            lastFollowerName: document.getElementById('last-follower-name'),
+            liveTimeValue: document.getElementById('live-time-value'),
+            followerNotification: document.getElementById('follower-notification'),
+            newFollowerName: document.getElementById('new-follower-name')
         };
         
-        console.log('🎭 Dados simulados criados:', this.currentData);
-        console.log('🖼️ Avatar simulado:', this.currentData.avatar);
-    }
-
-    getRandomTitle() {
-        const titles = [
-            'Live IRL - Explorando a cidade! 🎮',
-            'Conversando com o chat ao vivo 💬',
-            'Stream chill - Vem conversar! ✨',
-            'Interagindo com vocês! 🎉',
-            'Live descontraída 😄',
-            'Passeando pela cidade 🚶‍♂️',
-            'Chat e diversão! 🎯'
-        ];
-        return titles[Math.floor(Math.random() * titles.length)];
-    }
-
-    updatePageTitle() {
-        const pageTitle = document.getElementById('page-title');
-        if (pageTitle) {
-            const status = this.currentData.isLive ? 'AO VIVO' : 'OFFLINE';
-            pageTitle.textContent = `${this.currentData.displayName} - ${status}`;
+        // Verificar se todos os elementos foram encontrados
+        const missingElements = Object.entries(this.elements)
+            .filter(([key, element]) => !element)
+            .map(([key]) => key);
+            
+        if (missingElements.length > 0) {
+            console.warn('⚠️ Elementos DOM não encontrados:', missingElements);
+        } else {
+            console.log('✅ Todos os elementos DOM encontrados');
         }
     }
-
-    updateInterface() {
+    
+    /**
+     * Configurar timer do tempo de live
+     */
+    setupLiveTimer() {
+        console.log('⏰ Configurando timer de live...');
+        
+        // Definir horário de início da live (agora)
+        this.config.liveStartTime = new Date();
+        
+        // Atualizar a cada segundo
+        this.liveTimer = setInterval(() => {
+            this.updateLiveTime();
+        }, 1000);
+        
+        // Primeira atualização
+        this.updateLiveTime();
+        
+        console.log('✅ Timer de live configurado');
+    }
+    
+    /**
+     * Atualizar tempo de live
+     */
+    updateLiveTime() {
+        if (!this.config.liveStartTime || !this.elements.liveTimeValue) return;
+        
+        const now = new Date();
+        const diff = now - this.config.liveStartTime;
+        
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        this.elements.liveTimeValue.textContent = timeString;
+    }
+    
+    /**
+     * Inicializar último seguidor
+     */
+    initializeLastFollower() {
+        console.log('👤 Inicializando último seguidor...');
+        
+        // Definir um seguidor inicial
+        this.lastFollower = this.getRandomName();
+        this.updateLastFollower(this.lastFollower);
+        
+        console.log('✅ Último seguidor inicializado:', this.lastFollower);
+    }
+    
+    /**
+     * Atualizar último seguidor
+     */
+    updateLastFollower(followerName) {
+        if (!this.elements.lastFollowerName) return;
+        
+        this.lastFollower = followerName;
+        this.elements.lastFollowerName.textContent = followerName;
+        
+        console.log('👤 Último seguidor atualizado:', followerName);
+    }
+    
+    /**
+     * Conectar com API da Twitch
+     */
+    async connectToTwitchAPI() {
+        console.log('🔌 Tentando conectar com API da Twitch...');
+        
         try {
-            console.log('🔄 Atualizando interface...');
-            
-            // Atualizar informações do streamer
-            const streamerName = document.getElementById('streamer-name-mobile');
-            const streamTitle = document.getElementById('stream-title-mobile');
-            const streamerAvatar = document.getElementById('streamer-avatar-mobile');
-            
-            if (streamerName) {
-                streamerName.textContent = this.currentData.displayName;
+            // Verificar se TwitchAPI está disponível
+            if (typeof TwitchAPI === 'undefined') {
+                console.warn('⚠️ TwitchAPI não encontrada, usando modo simulado');
+                this.config.simulationMode = true;
+                return;
             }
             
-            if (streamTitle) {
-                streamTitle.textContent = this.currentData.title;
+            // Criar instância da API
+            this.twitchAPI = new TwitchAPI();
+            
+            // Testar conexão
+            const connected = await this.twitchAPI.testConnection();
+            
+            if (connected) {
+                console.log('✅ API da Twitch conectada com sucesso!');
+                this.apiConnected = true;
+                this.config.simulationMode = false;
+                
+                // Obter contagem inicial de seguidores
+                await this.updateFollowerCount();
+                
+            } else {
+                console.warn('⚠️ Não foi possível conectar com API, usando modo simulado');
+                this.apiConnected = false;
+                this.config.simulationMode = true;
             }
-            
-            if (streamerAvatar) {
-                console.log('🖼️ Atualizando avatar para:', this.currentData.avatar);
-                
-                // Configurar avatar com fallback
-                streamerAvatar.src = this.currentData.avatar;
-                streamerAvatar.alt = this.currentData.displayName;
-                
-                // Adicionar tratamento de erro para o avatar
-                streamerAvatar.onerror = () => {
-                    console.log('❌ Erro ao carregar avatar, usando padrão');
-                    const defaultAvatar = `https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-70x70.png`;
-                    if (streamerAvatar.src !== defaultAvatar) {
-                        streamerAvatar.src = defaultAvatar;
-                    }
-                };
-                
-                // Adicionar evento de sucesso
-                streamerAvatar.onload = () => {
-                    console.log('✅ Avatar carregado com sucesso');
-                };
-            }
-            
-            // Atualizar contadores
-            this.updateCounters();
-            
-            console.log('✅ Interface atualizada');
             
         } catch (error) {
-            console.error('❌ Erro ao atualizar interface:', error);
+            console.error('❌ Erro ao conectar com API:', error);
+            this.apiConnected = false;
+            this.config.simulationMode = true;
         }
     }
-
-    updateCounters() {
-        const viewersElement = document.getElementById('viewers-count-mobile');
-        const followersElement = document.getElementById('followers-count-mobile');
-        const chattersElement = document.getElementById('chatters-count-mobile');
+    
+    /**
+     * Atualizar contagem de seguidores
+     */
+    async updateFollowerCount() {
+        if (!this.twitchAPI || !this.apiConnected) return;
         
-        if (viewersElement) {
-            viewersElement.textContent = this.formatNumber(this.currentData.viewers);
-        }
-        
-        if (followersElement) {
-            followersElement.textContent = this.formatNumber(this.currentData.followers);
-        }
-        
-        if (chattersElement) {
-            // Chatters geralmente são 10-30% dos viewers
-            const chatters = Math.floor(this.currentData.viewers * (0.1 + Math.random() * 0.2));
-            chattersElement.textContent = this.formatNumber(chatters);
-        }
-    }
-
-    formatNumber(num) {
-        if (num >= 1000000) {
-            return (num / 1000000).toFixed(1) + 'M';
-        } else if (num >= 1000) {
-            return (num / 1000).toFixed(1) + 'K';
-        }
-        return num.toString();
-    }
-
-    startDataUpdates() {
-        // Atualizar dados a cada 30 segundos
-        this.updateInterval = setInterval(async () => {
-            try {
-                // Tentar atualizar com dados reais
-                if (typeof twitchAPI !== 'undefined') {
-                    const channelInfo = await twitchAPI.getChannelInfo();
+        try {
+            const userInfo = await this.twitchAPI.getUserInfo();
+            if (userInfo && userInfo.follower_count !== undefined) {
+                const newCount = userInfo.follower_count;
+                
+                // Verificar se houve novos seguidores
+                if (this.lastFollowerCount > 0 && newCount > this.lastFollowerCount) {
+                    const newFollowers = newCount - this.lastFollowerCount;
+                    console.log(`🎉 ${newFollowers} novo(s) seguidor(es) detectado(s)!`);
                     
-                    if (channelInfo && channelInfo.display_name) {
-                        this.currentData.viewers = channelInfo.viewer_count || this.currentData.viewers;
-                        this.currentData.followers = channelInfo.follower_count || this.currentData.followers;
-                        this.currentData.isLive = channelInfo.is_live !== undefined ? channelInfo.is_live : true;
-                        this.currentData.title = channelInfo.title || this.currentData.title;
+                    // Disparar notificação para cada novo seguidor
+                    for (let i = 0; i < newFollowers; i++) {
+                        setTimeout(() => {
+                            this.triggerNewFollower();
+                        }, i * 2000); // 2 segundos entre cada notificação
                     }
                 }
                 
-                // Simular pequenas variações nos dados
-                this.simulateDataVariations();
-                
-                // Atualizar interface
-                this.updateCounters();
-                
-            } catch (error) {
-                console.log('⚠️ Erro na atualização, mantendo dados atuais');
-                this.simulateDataVariations();
-                this.updateCounters();
+                this.lastFollowerCount = newCount;
+                console.log(`👥 Seguidores atuais: ${newCount}`);
             }
-        }, 30000); // 30 segundos
-    }
-
-    simulateDataVariations() {
-        // Simular pequenas variações realistas
-        const viewerChange = Math.floor(Math.random() * 10) - 5; // -5 a +5
-        const followerChange = Math.random() > 0.8 ? Math.floor(Math.random() * 3) + 1 : 0; // Chance de ganhar seguidores
-        
-        this.currentData.viewers = Math.max(10, this.currentData.viewers + viewerChange);
-        this.currentData.followers += followerChange;
-        
-        if (followerChange > 0) {
-            console.log(`🎉 +${followerChange} novo(s) seguidor(es)!`);
+            
+        } catch (error) {
+            console.error('❌ Erro ao atualizar contagem de seguidores:', error);
         }
     }
-
-    startFollowersUpdate() {
-        const followersContainer = document.getElementById('followers-list-mobile');
-        if (!followersContainer) return;
+    
+    /**
+     * Configurar verificação de novos seguidores
+     */
+    setupFollowerCheck() {
+        console.log('🔄 Configurando verificação de seguidores...');
         
-        // Atualizar lista de seguidores a cada 45 segundos
-        this.followersInterval = setInterval(() => {
-            this.updateRecentFollowers();
-        }, 45000);
-        
-        // Atualizar imediatamente
-        this.updateRecentFollowers();
+        if (this.apiConnected) {
+            // Verificar API a cada 30 segundos
+            setInterval(async () => {
+                await this.updateFollowerCount();
+            }, this.config.checkInterval);
+            
+            console.log('✅ Verificação de API configurada');
+        } else {
+            // Modo simulado - 30% de chance a cada 30-60 segundos
+            setInterval(() => {
+                if (Math.random() < 0.3) { // 30% de chance
+                    const newFollower = this.getRandomName();
+                    this.triggerNewFollower(newFollower);
+                }
+            }, this.config.checkInterval);
+            
+            console.log('✅ Simulação de seguidores configurada');
+        }
     }
-
-    updateRecentFollowers() {
-        const followersContainer = document.getElementById('followers-list-mobile');
-        if (!followersContainer) return;
-        
-        // Simular novo seguidor ocasionalmente
-        if (Math.random() > 0.7) {
-            const newFollower = `User${Math.floor(Math.random() * 9999)}`;
-            this.recentFollowers.unshift(newFollower);
-            this.recentFollowers = this.recentFollowers.slice(0, 4); // Manter apenas 4
+    
+    /**
+     * Disparar notificação de novo seguidor
+     */
+    triggerNewFollower(followerName = null) {
+        if (!followerName) {
+            followerName = this.getRandomName();
         }
         
-        followersContainer.innerHTML = '';
-        this.recentFollowers.forEach(follower => {
-            const followerElement = document.createElement('div');
-            followerElement.className = 'follower-item-mobile';
-            followerElement.textContent = follower;
-            followersContainer.appendChild(followerElement);
-        });
-    }
-
-    startUptimeCounter() {
-        const uptimeElement = document.getElementById('stream-uptime-mobile');
-        if (!uptimeElement) return;
+        console.log('🎉 Novo seguidor:', followerName);
         
-        this.uptimeInterval = setInterval(() => {
-            if (this.currentData.isLive && this.currentData.startTime) {
-                const now = new Date();
-                const diff = Math.floor((now - this.currentData.startTime) / 1000);
-                
-                const hours = Math.floor(diff / 3600);
-                const minutes = Math.floor((diff % 3600) / 60);
-                const seconds = diff % 60;
-                
-                const uptime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                uptimeElement.textContent = uptime;
-            } else {
-                uptimeElement.textContent = '00:00:00';
-            }
-        }, 1000);
+        // Atualizar último seguidor
+        this.updateLastFollower(followerName);
+        
+        // Mostrar notificação
+        this.showFollowerNotification(followerName);
     }
-
+    
+    /**
+     * Mostrar notificação de novo seguidor
+     */
+    showFollowerNotification(followerName) {
+        if (!this.elements.followerNotification || !this.elements.newFollowerName) {
+            console.warn('⚠️ Elementos de notificação não encontrados');
+            return;
+        }
+        
+        // Definir nome do seguidor
+        this.elements.newFollowerName.textContent = followerName;
+        
+        // Remover classe show se existir
+        this.elements.followerNotification.classList.remove('show');
+        
+        // Forçar reflow
+        this.elements.followerNotification.offsetHeight;
+        
+        // Adicionar classe show para iniciar animação
+        this.elements.followerNotification.classList.add('show');
+        
+        // Remover após duração especificada
+        setTimeout(() => {
+            this.elements.followerNotification.classList.remove('show');
+        }, this.config.notificationDuration);
+        
+        console.log('📢 Notificação de seguidor exibida:', followerName);
+    }
+    
+    /**
+     * Obter nome aleatório para simulação
+     */
+    getRandomName() {
+        const randomIndex = Math.floor(Math.random() * this.simulatedNames.length);
+        return this.simulatedNames[randomIndex];
+    }
+    
+    /**
+     * Parar o overlay
+     */
     stop() {
         console.log('🛑 Parando overlay mobile...');
         
-        if (this.updateInterval) {
-            clearInterval(this.updateInterval);
-            this.updateInterval = null;
+        this.isRunning = false;
+        
+        // Limpar timer de live
+        if (this.liveTimer) {
+            clearInterval(this.liveTimer);
+            this.liveTimer = null;
         }
         
-        if (this.followersInterval) {
-            clearInterval(this.followersInterval);
-            this.followersInterval = null;
-        }
-        
-        if (this.uptimeInterval) {
-            clearInterval(this.uptimeInterval);
-            this.uptimeInterval = null;
-        }
-        
-        this.isInitialized = false;
         console.log('✅ Overlay mobile parado');
     }
-}
-
-// Funções globais para controle do chat
-function toggleMobileChat() {
-    const chatContainer = document.querySelector('.chat-container-mobile');
-    const toggleButton = document.getElementById('toggle-chat-mobile');
     
-    if (chatContainer && toggleButton) {
-        if (chatContainer.style.display === 'none') {
-            chatContainer.style.display = 'block';
-            toggleButton.textContent = '−';
-        } else {
-            chatContainer.style.display = 'none';
-            toggleButton.textContent = '+';
-        }
+    /**
+     * Obter status do overlay
+     */
+    getStatus() {
+        return {
+            isRunning: this.isRunning,
+            lastFollower: this.lastFollower,
+            liveStartTime: this.config.liveStartTime,
+            apiConnected: this.apiConnected,
+            simulationMode: this.config.simulationMode,
+            lastFollowerCount: this.lastFollowerCount,
+            config: this.config
+        };
     }
 }
 
-// Exportar classe para uso global
-window.MobileOverlay = MobileOverlay;
+// === FUNÇÕES GLOBAIS PARA CONTROLE EXTERNO ===
 
-console.log('📱 overlay-mobile.js carregado com sucesso!'); 
+/**
+ * Disparar novo seguidor manualmente
+ */
+function triggerNewFollower(followerName = null) {
+    if (window.mobileOverlay) {
+        window.mobileOverlay.triggerNewFollower(followerName);
+        return true;
+    }
+    console.warn('⚠️ MobileOverlay não inicializado');
+    return false;
+}
+
+/**
+ * Resetar tempo de live
+ */
+function resetLiveTime() {
+    if (window.mobileOverlay) {
+        window.mobileOverlay.config.liveStartTime = new Date();
+        console.log('⏰ Tempo de live resetado');
+        return true;
+    }
+    console.warn('⚠️ MobileOverlay não inicializado');
+    return false;
+}
+
+/**
+ * Definir último seguidor manualmente
+ */
+function setLastFollower(followerName) {
+    if (window.mobileOverlay && followerName) {
+        window.mobileOverlay.updateLastFollower(followerName);
+        console.log('👤 Último seguidor definido:', followerName);
+        return true;
+    }
+    console.warn('⚠️ MobileOverlay não inicializado ou nome inválido');
+    return false;
+}
+
+/**
+ * Obter status do overlay
+ */
+function getOverlayStatus() {
+    if (window.mobileOverlay) {
+        return window.mobileOverlay.getStatus();
+    }
+    return null;
+}
+
+// === INICIALIZAÇÃO AUTOMÁTICA ===
+
+// Aguardar carregamento da página
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('📱 DOM carregado, aguardando inicialização...');
+    
+    // Aguardar um pouco para garantir que todos os scripts carregaram
+    setTimeout(async () => {
+        try {
+            // Criar instância global
+            window.mobileOverlay = new MobileOverlay();
+            
+            // Inicializar
+            await window.mobileOverlay.initialize();
+            
+            console.log('🎉 Sistema mobile minimalista pronto!');
+            
+        } catch (error) {
+            console.error('❌ Erro na inicialização automática:', error);
+        }
+    }, 1000);
+});
+
+// === LOGS DE DEBUG ===
+
+console.log('📱 overlay-mobile.js carregado - Versão Minimalista 3.0');
+console.log('🎯 Funcionalidades: Novo Seguidor + Último Seguidor + Tempo de Live');
+console.log('🎨 Design: Verde para notificação, Azul para último seguidor, Laranja para tempo');
+
+// Exportar para uso global
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { MobileOverlay, triggerNewFollower, resetLiveTime, setLastFollower, getOverlayStatus };
+} 

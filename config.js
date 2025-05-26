@@ -5,7 +5,7 @@ const CONFIG = {
     
     // ⚠️ AVISO DE SEGURANÇA: Em produção, NUNCA exponha o Client Secret no frontend!
     // Use um backend/servidor para gerenciar tokens de forma segura
-    TWITCH_CLIENT_SECRET: '', // Deixe vazio para segurança no frontend
+    TWITCH_CLIENT_SECRET: 'wwkph643l9fjxsthmdwsj1a3rqj1r7', // Temporário para desenvolvimento
     
     CHANNEL_NAME: 'flwbielzinn',
     
@@ -68,7 +68,7 @@ Isso é um risco de segurança grave.
 ` : ''}
 
 🔄 Testando conexão com API da Twitch...
-`);
+`); 
 
 // Função para verificar configuração
 function validateConfig() {

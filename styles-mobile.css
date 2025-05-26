@@ -1,4 +1,4 @@
-/* Estilos para Overlay Mobile (IRL) */
+/* Reset e Base */
 * {
     margin: 0;
     padding: 0;
@@ -11,302 +11,413 @@ body {
     overflow: hidden;
     width: 100vw;
     height: 100vh;
+    position: relative;
 }
 
-.mobile-overlay {
-    position: relative;
+/* Container Principal Minimalista */
+.mobile-overlay-minimal {
     width: 100%;
     height: 100%;
+    position: relative;
     pointer-events: none;
 }
 
-/* Informações do Canal - Compacto */
-.channel-info-mobile {
-    position: absolute;
-    top: 50%;
+/* === ÚLTIMO SEGUIDOR (FIXO NO TOPO) === */
+.last-follower-display {
+    position: fixed;
+    top: 20px;
     left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.8);
-    border: 2px solid #9146ff;
-    border-radius: 25px;
-    padding: 8px 15px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 20px rgba(145, 70, 255, 0.3);
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, rgba(0, 150, 255, 0.95), rgba(0, 100, 200, 0.95));
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 15px 25px;
+    box-shadow: 0 8px 32px rgba(0, 150, 255, 0.3);
     pointer-events: auto;
-    max-width: 280px;
-}
-
-.streamer-avatar-mobile {
-    position: relative;
-    margin-right: 10px;
-}
-
-.streamer-avatar-mobile img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2px solid #00ff88;
-}
-
-.live-indicator-mobile {
-    position: absolute;
-    bottom: -2px;
-    right: -2px;
-    background: rgba(255, 0, 0, 0.9);
-    border-radius: 50%;
-    width: 16px;
-    height: 16px;
+    min-width: 280px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 8px;
-    border: 2px solid white;
-    animation: pulseLive 2s infinite;
+    gap: 15px;
+    animation: slideInFromTop 1s ease-out;
 }
 
-.channel-details-mobile {
+.last-follower-icon {
+    font-size: 24px;
+    animation: pulse 2s infinite;
+}
+
+.last-follower-text {
     flex: 1;
-    min-width: 0;
 }
 
-.streamer-name-mobile {
-    color: #9146ff;
-    font-weight: bold;
-    font-size: 14px;
+.last-follower-label {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
+    font-weight: 500;
     margin-bottom: 2px;
 }
 
-.stream-title-mobile {
-    color: white;
-    font-size: 11px;
-    opacity: 0.9;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.last-follower-name {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-/* Contadores Compactos - Lado direito */
-.counters-mobile {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.counter-item-mobile {
-    background: rgba(0, 0, 0, 0.8);
-    border: 2px solid #00ff88;
-    border-radius: 18px;
-    padding: 5px 10px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
-    pointer-events: auto;
-    min-width: 60px;
-}
-
-/* Cores diferentes para cada contador */
-.counter-item-mobile:nth-child(1) {
-    border-color: #00ff88; /* Viewers - Verde */
-}
-
-.counter-item-mobile:nth-child(2) {
-    border-color: #ff6b6b; /* Followers - Vermelho */
-}
-
-.counter-item-mobile:nth-child(3) {
-    border-color: #00bfff; /* Chatters - Azul */
-}
-
-.counter-icon {
-    font-size: 12px;
-}
-
-.counter-value {
-    color: #00ff88;
-    font-weight: bold;
-    font-size: 11px;
-    min-width: 18px;
-    text-align: center;
-}
-
-/* Cores dos valores conforme o tipo */
-.counter-item-mobile:nth-child(1) .counter-value {
-    color: #00ff88; /* Viewers */
-}
-
-.counter-item-mobile:nth-child(2) .counter-value {
-    color: #ff6b6b; /* Followers */
-}
-
-.counter-item-mobile:nth-child(3) .counter-value {
-    color: #00bfff; /* Chatters */
-}
-
-/* Seguidores Recentes - Lado esquerdo no topo */
-.recent-followers-mobile {
-    position: absolute;
-    top: 70%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 180px;
-    background: rgba(0, 0, 0, 0.8);
-    border: 2px solid #ffd700;
-    border-radius: 12px;
-    padding: 8px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
-    pointer-events: auto;
-}
-
-.followers-header-mobile {
-    color: #ffd700;
-    font-size: 11px;
-    font-weight: bold;
-    margin-bottom: 6px;
-    text-align: center;
-    border-bottom: 1px solid rgba(255, 215, 0, 0.3);
-    padding-bottom: 4px;
-}
-
-.followers-list-mobile {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-}
-
-.follower-item-mobile {
-    background: rgba(255, 215, 0, 0.1);
-    border: 1px solid #ffd700;
-    border-radius: 8px;
-    padding: 2px 6px;
-    font-size: 9px;
-    color: #ffd700;
-    font-weight: bold;
-}
-
-/* Tempo de Stream - Canto inferior direito */
-.stream-time-mobile {
-    position: absolute;
-    bottom: 60px;
-    right: 10px;
-    background: rgba(0, 0, 0, 0.8);
-    border: 2px solid #ff9500;
+/* === TEMPO DE LIVE (FIXO NO CANTO) === */
+.live-time-display {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, rgba(255, 100, 0, 0.95), rgba(200, 50, 0, 0.95));
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 15px;
-    padding: 6px 10px;
+    padding: 12px 18px;
+    box-shadow: 0 8px 32px rgba(255, 100, 0, 0.3);
+    pointer-events: auto;
     display: flex;
     align-items: center;
-    gap: 5px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 15px rgba(255, 149, 0, 0.3);
-    pointer-events: auto;
+    gap: 10px;
+    animation: slideInFromBottom 1s ease-out;
 }
 
-.time-icon {
-    font-size: 12px;
+.live-time-icon {
+    font-size: 20px;
+    animation: pulse 2s infinite;
 }
 
-#stream-uptime-mobile {
-    color: #ff9500;
-    font-weight: bold;
-    font-size: 11px;
+.live-time-text {
+    text-align: left;
+}
+
+.live-time-label {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 10px;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.live-time-value {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
     font-family: 'Courier New', monospace;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-/* Responsividade */
+/* === NOTIFICAÇÃO DE NOVO SEGUIDOR (FLUTUANTE) === */
+.new-follower-notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: linear-gradient(135deg, rgba(0, 255, 100, 0.95), rgba(0, 200, 150, 0.95));
+    backdrop-filter: blur(15px);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
+    padding: 25px 30px;
+    box-shadow: 
+        0 15px 35px rgba(0, 255, 100, 0.4),
+        0 5px 15px rgba(0, 0, 0, 0.3);
+    pointer-events: auto;
+    z-index: 1000;
+    min-width: 320px;
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+.new-follower-notification.show {
+    animation: 
+        followerNotificationIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards,
+        followerNotificationOut 0.5s ease-in 4s forwards;
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    text-align: left;
+}
+
+.notification-icon {
+    font-size: 32px;
+    animation: heartBeat 1.5s ease-in-out infinite;
+}
+
+.notification-text {
+    flex: 1;
+}
+
+.notification-title {
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    margin-bottom: 5px;
+}
+
+.notification-username {
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 900;
+    text-shadow: 0 2px 8px rgba(255, 255, 255, 0.5);
+    animation: glow 1.5s ease-in-out infinite alternate;
+}
+
+.notification-celebration {
+    font-size: 28px;
+    animation: bounce 1s ease-in-out infinite;
+}
+
+/* === ANIMAÇÕES === */
+
+/* Animação de entrada do topo */
+@keyframes slideInFromTop {
+    0% {
+        transform: translateX(-50%) translateY(-100px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Animação de entrada de baixo */
+@keyframes slideInFromBottom {
+    0% {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Animação de pulso */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* Animação de brilho */
+@keyframes glow {
+    0% {
+        text-shadow: 0 2px 8px rgba(255, 255, 255, 0.5);
+    }
+    100% {
+        text-shadow: 0 2px 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.4);
+    }
+}
+
+/* Animação de entrada da notificação */
+@keyframes followerNotificationIn {
+    0% {
+        transform: translate(-50%, -50%) scale(0) rotate(-180deg);
+        opacity: 0;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.2) rotate(-90deg);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+/* Animação de saída da notificação */
+@keyframes followerNotificationOut {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Animação de batimento cardíaco */
+@keyframes heartBeat {
+    0%, 100% {
+        transform: scale(1);
+    }
+    25% {
+        transform: scale(1.1);
+    }
+    50% {
+        transform: scale(1);
+    }
+    75% {
+        transform: scale(1.05);
+    }
+}
+
+/* Animação de bounce */
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+/* === RESPONSIVIDADE === */
+
+/* Telas pequenas (celulares em retrato) */
 @media (max-width: 480px) {
-    .channel-info-mobile {
-        max-width: 250px;
-        padding: 6px 12px;
+    .last-follower-display {
+        min-width: 260px;
+        padding: 12px 20px;
+        top: 15px;
     }
-
-    .recent-followers-mobile {
-        width: 160px;
+    
+    .last-follower-name {
+        font-size: 16px;
     }
-
-    .counter-item-mobile {
-        padding: 4px 8px;
-        min-width: 55px;
+    
+    .live-time-display {
+        padding: 10px 15px;
+        bottom: 15px;
+        right: 15px;
     }
-
-    .counter-icon {
-        font-size: 11px;
+    
+    .live-time-value {
+        font-size: 14px;
     }
-
-    .counter-value {
-        font-size: 10px;
+    
+    .new-follower-notification {
+        min-width: 280px;
+        padding: 20px 25px;
+    }
+    
+    .notification-title {
+        font-size: 16px;
+    }
+    
+    .notification-username {
+        font-size: 20px;
     }
 }
 
+/* Telas muito pequenas */
 @media (max-width: 360px) {
-    .channel-info-mobile {
-        max-width: 220px;
-        padding: 5px 10px;
+    .last-follower-display {
+        min-width: 240px;
+        padding: 10px 18px;
     }
-
-    .streamer-avatar-mobile img {
-        width: 35px;
-        height: 35px;
+    
+    .last-follower-name {
+        font-size: 15px;
     }
-
-    .recent-followers-mobile {
-        width: 140px;
-        padding: 6px;
+    
+    .live-time-display {
+        padding: 8px 12px;
     }
-
-    .counter-item-mobile {
-        padding: 3px 6px;
-        min-width: 50px;
+    
+    .live-time-value {
+        font-size: 13px;
     }
-
-    .counter-icon {
-        font-size: 10px;
-    }
-
-    .counter-value {
-        font-size: 9px;
+    
+    .new-follower-notification {
+        min-width: 260px;
+        padding: 18px 22px;
     }
 }
 
-/* Efeitos e animações */
-.mobile-overlay > * {
+/* Modo paisagem em celulares */
+@media (max-height: 500px) and (orientation: landscape) {
+    .last-follower-display {
+        top: 10px;
+        padding: 10px 18px;
+    }
+    
+    .last-follower-name {
+        font-size: 15px;
+    }
+    
+    .live-time-display {
+        bottom: 10px;
+        right: 10px;
+        padding: 8px 12px;
+    }
+    
+    .live-time-value {
+        font-size: 13px;
+    }
+    
+    .new-follower-notification {
+        padding: 15px 20px;
+    }
+}
+
+/* === EFEITOS ESPECIAIS === */
+
+/* Efeito de partículas flutuantes para último seguidor */
+.last-follower-display::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(0, 150, 255, 0.1) 1px, transparent 1px);
+    background-size: 15px 15px;
+    animation: float 15s linear infinite;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Efeito de partículas flutuantes para tempo de live */
+.live-time-display::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 100, 0, 0.1) 1px, transparent 1px);
+    background-size: 12px 12px;
+    animation: float 20s linear infinite reverse;
+    pointer-events: none;
+    z-index: -1;
+}
+
+@keyframes float {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    100% {
+        transform: translate(-15px, -15px) rotate(360deg);
+    }
+}
+
+/* Efeito de brilho no hover */
+.last-follower-display:hover {
+    box-shadow: 0 12px 40px rgba(0, 150, 255, 0.5);
+    transform: translateX(-50%) translateY(-2px);
     transition: all 0.3s ease;
 }
 
-.counter-item-mobile:hover,
-.channel-info-mobile:hover,
-.recent-followers-mobile:hover,
-.stream-time-mobile:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 25px rgba(145, 70, 255, 0.4);
-}
-
-.live-indicator-mobile {
-    animation: pulseLive 2s infinite;
-}
-
-@keyframes pulseLive {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.7; transform: scale(1.1); }
-}
-
-.counter-value {
+.live-time-display:hover {
+    box-shadow: 0 12px 40px rgba(255, 100, 0, 0.5);
+    transform: translateY(-2px);
     transition: all 0.3s ease;
 }
 
-.counter-value.updated {
-    animation: counterUpdate 0.5s ease;
-}
-
-@keyframes counterUpdate {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); color: #ffffff; }
-    100% { transform: scale(1); }
+.new-follower-notification:hover {
+    transform: translate(-50%, -50%) scale(1.05);
+    transition: all 0.3s ease;
 } 

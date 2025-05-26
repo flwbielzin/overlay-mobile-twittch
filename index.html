@@ -3,54 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="page-title">Overlay Mobile - Carregando...</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <title id="page-title">Overlay Mobile - FlwBielzinn</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles-mobile.css">
 </head>
 <body>
-    <!-- Overlay para Celular/IRL -->
-    <div class="mobile-overlay">
-        <!-- Informações do Canal (Compacto) -->
-        <div class="channel-info-mobile">
-            <div class="streamer-avatar-mobile">
-                <img id="streamer-avatar-mobile" src="https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-70x70.png" alt="Avatar">
-                <div class="live-indicator-mobile">🔴</div>
-            </div>
-            <div class="channel-details-mobile">
-                <div class="streamer-name-mobile" id="streamer-name-mobile">Carregando...</div>
-                <div class="stream-title-mobile" id="stream-title-mobile">Carregando informações...</div>
+    <!-- Overlay Mobile Minimalista -->
+    <div class="mobile-overlay-minimal">
+        
+        <!-- Último Seguidor (Fixo no topo) -->
+        <div class="last-follower-display">
+            <div class="last-follower-icon">👤</div>
+            <div class="last-follower-text">
+                <div class="last-follower-label">Último Seguidor:</div>
+                <div class="last-follower-name" id="last-follower-name">Aguardando...</div>
             </div>
         </div>
 
-        <!-- Contadores Compactos -->
-        <div class="counters-mobile">
-            <div class="counter-item-mobile">
-                <span class="counter-icon">👥</span>
-                <span class="counter-value" id="viewers-count-mobile">0</span>
-            </div>
-            <div class="counter-item-mobile">
-                <span class="counter-icon">❤️</span>
-                <span class="counter-value" id="followers-count-mobile">0</span>
-            </div>
-            <div class="counter-item-mobile">
-                <span class="counter-icon">💬</span>
-                <span class="counter-value" id="chatters-count-mobile">0</span>
+        <!-- Tempo de Live (Fixo no canto) -->
+        <div class="live-time-display">
+            <div class="live-time-icon">⏰</div>
+            <div class="live-time-text">
+                <div class="live-time-label">Tempo de Live:</div>
+                <div class="live-time-value" id="live-time-value">00:00:00</div>
             </div>
         </div>
 
-        <!-- Seguidores Recentes (Compacto) -->
-        <div class="recent-followers-mobile">
-            <div class="followers-header-mobile">🆕 Novos Seguidores</div>
-            <div class="followers-list-mobile" id="followers-list-mobile">
-                <!-- Lista de seguidores recentes -->
+        <!-- Notificação de Novo Seguidor (Flutuante) -->
+        <div class="new-follower-notification" id="follower-notification">
+            <div class="notification-content">
+                <div class="notification-icon">❤️</div>
+                <div class="notification-text">
+                    <div class="notification-title">Novo Seguidor!</div>
+                    <div class="notification-username" id="new-follower-name">Usuario123</div>
+                </div>
+                <div class="notification-celebration">🎉</div>
             </div>
         </div>
 
-        <!-- Tempo de Stream -->
-        <div class="stream-time-mobile">
-            <span class="time-icon">⏰</span>
-            <span id="stream-uptime-mobile">00:00:00</span>
-        </div>
     </div>
 
     <!-- Scripts -->
@@ -66,7 +56,7 @@
         
         // Função para inicializar tudo na ordem correta
         async function inicializarSistema() {
-            console.log('🚀 Iniciando sistema overlay mobile...');
+            console.log('🚀 Iniciando sistema overlay mobile minimalista...');
             
             try {
                 // 1. Verificar configuração
@@ -102,7 +92,7 @@
                 mobileOverlay = new MobileOverlay();
                 await mobileOverlay.initialize();
                 
-                console.log('🎉 Sistema inicializado com sucesso!');
+                console.log('🎉 Sistema minimalista inicializado com sucesso!');
                 
             } catch (error) {
                 console.error('❌ Erro na inicialização:', error);
@@ -111,7 +101,7 @@
         
         // Inicializar quando a página carregar
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('📱 Carregando overlay mobile...');
+            console.log('📱 Carregando overlay mobile minimalista...');
             
             // Aguardar um pouco para garantir que todos os scripts carregaram
             setTimeout(inicializarSistema, 500);
